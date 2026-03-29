@@ -34,13 +34,6 @@ public class HealthMetrics {
     @Column(name = "heart_rate")
     private double heartRate;
 
-    public HealthMetrics(User user, LocalDate date, double weight, double height, double heartRate) {
-        this.user = user;
-        this.date = date;
-        this.weight = weight;
-        this.height = height;
-        this.heartRate = heartRate;
-    }
 
     public HealthMetrics(Long id, User user, LocalDate date, double weight, double height, double heartRate) {
         this.id = id;

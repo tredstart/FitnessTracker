@@ -72,6 +72,41 @@ class DatabaseSchemaTest {
         }
     }
 
+    @Test
+    void shouldHaveTrainingsTable() throws Exception {
+        try (Connection conn = dataSource.getConnection()) {
+            assertThat(tableExists(conn, "trainings")).isTrue();
+        }
+    }
+
+    @Test
+    void trainingsTableHasExpectedColumns() throws Exception {
+        try (Connection conn = dataSource.getConnection()) {
+            Set<String> cols = tableColumns(conn, "trainings");
+            assertThat(cols).contains("id", "user_id", "start_time", "end_time", "activity_type", "distance", "average_speed");
+        }
+    }
+
+    @Test
+    void statisticsUserIdShouldBeUnique() throws Exception {
+        try (Connection conn = dataSource.getConnection()) {
+            DatabaseMetaData meta = conn.getMetaData();
+            boolean foundUniqueIndex = false;
+            try (ResultSet rs = meta.getIndexInfo(conn.getCatalog(), "PUBLIC", "STATISTICS", true, false)) {
+                while (rs.next()) {
+                    String col = rs.getString("COLUMN_NAME");
+                    if ("user_id".equalsIgnoreCase(col)) {
+                        foundUniqueIndex = true;
+                        break;
+                    }
+                }
+            }
+            assertThat(foundUniqueIndex)
+                    .as("statistics.user_id should have a unique index, enforcing OneToOne with users")
+                    .isTrue();
+        }
+    }
+
     private boolean tableExists(Connection conn, String expectedName) throws SQLException {
         DatabaseMetaData meta = conn.getMetaData();
         try (ResultSet rs = meta.getTables(conn.getCatalog(), null, "%", new String[]{"TABLE"})) {

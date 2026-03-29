@@ -2,7 +2,6 @@ package pl.wsb.fitnesstracker.user.api;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pl.wsb.fitnesstracker.statistics.api.Statistics;
 
 import java.time.LocalDate;
 
@@ -10,7 +9,7 @@ import java.time.LocalDate;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString(exclude = "statistics")
+@ToString
 public class User {
 
     @Id
@@ -28,11 +27,6 @@ public class User {
 
     @Column(nullable = false, unique = true)
     private String email;
-
-    @Setter
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "statistics_id", referencedColumnName = "id")
-    private Statistics statistics;
 
     public User(
             final String firstName,
