@@ -4,13 +4,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import pl.wsb.fitnesstracker.event.Event;
+import pl.wsb.fitnesstracker.event.EventRepository;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +39,9 @@ class Lab03EntitiesTest {
 
     @Autowired
     private DataSource dataSource;
+
+    @Autowired
+    private EventRepository eventRepository;
 
     @Test
     void shouldHaveEventTable() throws Exception {
@@ -114,5 +121,44 @@ class Lab03EntitiesTest {
             }
         }
         return cols;
+    }
+
+    @Test
+    void shouldFindUpcomingEvents() {
+        Event past = new Event();
+        past.setName("Stary event");
+        past.setStartTime(LocalDateTime.now().minusDays(1));
+
+        Event future = new Event();
+        future.setName("Nadchodzący event");
+        future.setStartTime(LocalDateTime.now().plusDays(5));
+
+        eventRepository.save(past);
+        eventRepository.save(future);
+
+        List<Event> upcoming = eventRepository.findUpcoming(LocalDateTime.now());
+
+        assertThat(upcoming).hasSize(1);
+        assertThat(upcoming.get(0).getName()).isEqualTo("Nadchodzący event");
+    }
+
+    @Test
+    void shouldReturnEventNamesWithParticipantCount() {
+        Event e1 = new Event();
+        e1.setName("Maraton Wrocław");
+
+        Event e2 = new Event();
+        e2.setName("Triathlon Gdańsk");
+
+        eventRepository.save(e1);
+        eventRepository.save(e2);
+
+        List<Object[]> results = eventRepository.findEventNamesWithParticipantCount();
+
+        assertThat(results).hasSize(2);
+        assertThat(results).anyMatch(row -> "Maraton Wrocław".equals(row[0]));
+        assertThat(results).anyMatch(row -> "Triathlon Gdańsk".equals(row[0]));
+
+        assertThat(results).allMatch(row -> ((Number) row[1]).longValue() == 0);
     }
 }
