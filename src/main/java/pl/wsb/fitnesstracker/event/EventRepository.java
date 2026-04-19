@@ -16,5 +16,5 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             value = "SELECT e.name, COUNT(ue.id) AS participant_count FROM event e LEFT JOIN user_event ue ON e.id = ue.event_id GROUP BY e.id, e.name",
             nativeQuery = true
     )
-    List<Object[]> findEventNamesWithParticipantCount();
+    List<EventParticipantCount> findEventNamesWithParticipantCount();
 }

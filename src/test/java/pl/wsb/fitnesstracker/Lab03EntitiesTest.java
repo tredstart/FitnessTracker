@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import pl.wsb.fitnesstracker.event.Event;
+import pl.wsb.fitnesstracker.event.EventParticipantCount;
 import pl.wsb.fitnesstracker.event.EventRepository;
 
 import javax.sql.DataSource;
@@ -153,12 +154,10 @@ class Lab03EntitiesTest {
         eventRepository.save(e1);
         eventRepository.save(e2);
 
-        List<Object[]> results = eventRepository.findEventNamesWithParticipantCount();
+        List<EventParticipantCount> results = eventRepository.findEventNamesWithParticipantCount();
 
         assertThat(results).hasSize(2);
-        assertThat(results).anyMatch(row -> "Maraton Wrocław".equals(row[0]));
-        assertThat(results).anyMatch(row -> "Triathlon Gdańsk".equals(row[0]));
-
-        assertThat(results).allMatch(row -> ((Number) row[1]).longValue() == 0);
+        assertThat(results).anyMatch(r -> "Maraton Wrocław".equals(r.getName()));
+        assertThat(results).anyMatch(r -> "Triathlon Gdańsk".equals(r.getName()));
     }
 }
